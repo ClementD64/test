@@ -1,0 +1,23 @@
+name: Build archiso
+
+on: 
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 1 * *'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
+      options: --privileged
+    steps:
+      - name: self-update and install archiso
+        run: pacman -Syu --noconfirm archiso
+      - name: build iso
+        run: mkarchiso -v -p ansible -w /tmp/work -o /tmp/out /usr/share/archiso/configs/releng/
+      - uses: actions/upload-artifact@master
+        with:
+          name: iso
+          path: /tmp/out/*.iso
+          if-no-files-found: error
